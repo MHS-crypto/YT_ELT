@@ -1,5 +1,6 @@
 import requests as re
 import json
+from datetime import datetime
 
 import os
 from dotenv import load_dotenv
@@ -32,7 +33,6 @@ def get_playlist():
             "uploads"
         ]
 
-        # print(f"Channel Playlist ID: {channel_playlistId}")
         return channel_playlistId
 
     except re.exceptions.RequestException as e:
@@ -71,7 +71,6 @@ def get_video_id(playlistId, max_results=50):
             if not page_token:
                 break
 
-        # print(f"Video IDs: {video_ids}")
         return video_ids
 
     except re.exceptions.RequestException as e:
@@ -119,14 +118,19 @@ def get_video_data(video_ids):
                     }
                 )
 
-        print(f"Video Data: {video_data}")
         return video_data
 
     except re.exceptions.RequestException as e:
         raise e
 
 
+def save_to_json(extracted_data):
+    file_path = f"./data/YT_video_stats_{datetime.today().strftime('%Y-%m-%d')}.json"
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(extracted_data, f, indent=4, ensure_ascii=False)
+
 if __name__ == "__main__":
     playlist_id = get_playlist()
     video_ids = get_video_id(playlist_id)
-    get_video_data(video_ids)
+    video_data = get_video_data(video_ids)
+    save_to_json(video_data)
