@@ -15,10 +15,10 @@ def get_playlist():
 
     try:
         params = {
-                "part": "contentDetails",
-                "forHandle": CHANNEL_HANDLE,
-                "key": API_KEY,
-            }
+            "part": "contentDetails",
+            "forHandle": CHANNEL_HANDLE,
+            "key": API_KEY,
+        }
 
         response = re.get(url, params=params)
 
@@ -71,7 +71,7 @@ def get_video_id(playlistId, max_results=50):
             if not page_token:
                 break
 
-        #print(f"Video IDs: {video_ids}")
+        # print(f"Video IDs: {video_ids}")
         return video_ids
 
     except re.exceptions.RequestException as e:
