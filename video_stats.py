@@ -11,11 +11,16 @@ CHANNEL_HANDLE = os.getenv("CHANNEL_HANDLE")
 
 
 def get_playlist():
-    url = f"https://youtube.googleapis.com/youtube/v3/channels?part=contentDetails&forHandle={CHANNEL_HANDLE}&key={API_KEY}"
+    url = "https://youtube.googleapis.com/youtube/v3/channels"
 
     try:
+        params = {
+                "part": "contentDetails",
+                "forHandle": CHANNEL_HANDLE,
+                "key": API_KEY,
+            }
 
-        response = re.get(url)
+        response = re.get(url, params=params)
 
         response.raise_for_status()  # Check if the request was successful
 
@@ -39,7 +44,7 @@ def get_video_id(playlistId, max_results=50):
     video_ids = []
     page_token = None
 
-    url = f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults={max_results}&playlistId={playlistId}&key={API_KEY}"
+    url = "https://youtube.googleapis.com/youtube/v3/playlistItems"
 
     try:
         while True:
@@ -66,7 +71,7 @@ def get_video_id(playlistId, max_results=50):
             if not page_token:
                 break
 
-        # print(f"Video IDs: {video_ids}")
+        #print(f"Video IDs: {video_ids}")
         return video_ids
 
     except re.exceptions.RequestException as e:
@@ -79,14 +84,14 @@ def batch_video_ids(video_ids, batch_size=50):
 
 
 def get_video_data(video_ids):
-    url = f"https://youtube.googleapis.com/youtube/v3/videos?part=contentDetails&part=snippet&part=statistics&key={API_KEY}"
+    url = "https://youtube.googleapis.com/youtube/v3/videos"
 
     video_data = []
 
     try:
         for batch in batch_video_ids(video_ids):
             params = {
-                "part": "statistics",
+                "part": "statistics,snippet,contentDetails",
                 "id": ",".join(batch),
                 "key": API_KEY,
             }
