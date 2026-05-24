@@ -27,7 +27,7 @@ def get_playlist():
             "uploads"
         ]
 
-        #print(f"Channel Playlist ID: {channel_playlistId}")
+        # print(f"Channel Playlist ID: {channel_playlistId}")
         return channel_playlistId
 
     except re.exceptions.RequestException as e:
@@ -66,7 +66,7 @@ def get_video_id(playlistId, max_results=50):
             if not page_token:
                 break
 
-        #print(f"Video IDs: {video_ids}")
+        # print(f"Video IDs: {video_ids}")
         return video_ids
 
     except re.exceptions.RequestException as e:
@@ -79,7 +79,7 @@ def batch_video_ids(video_ids, batch_size=50):
 
 
 def get_video_data(video_ids):
-    url = f"https://youtube.googleapis.com/youtube/v3/videos?part=contentDetails&part=snippet&part=statistics&id=vBEGODNmdas&key={API_KEY}"
+    url = f"https://youtube.googleapis.com/youtube/v3/videos?part=contentDetails&part=snippet&part=statistics&key={API_KEY}"
 
     video_data = []
 
@@ -102,13 +102,24 @@ def get_video_data(video_ids):
                 snippet = item["snippet"]
                 content_details = item["contentDetails"]
                 stats = item["statistics"]
-                video_data.append({"video_id": video_id, "title": snippet["title"], "publishedAt": snippet["publishedAt"], "duration": content_details["duration"], "views": stats.get("viewCount", None), "likesCount": stats.get("likeCount", None), "commentsCount": stats.get("commentCount", None)})
+                video_data.append(
+                    {
+                        "video_id": video_id,
+                        "title": snippet["title"],
+                        "publishedAt": snippet["publishedAt"],
+                        "duration": content_details["duration"],
+                        "views": stats.get("viewCount", None),
+                        "likesCount": stats.get("likeCount", None),
+                        "commentsCount": stats.get("commentCount", None),
+                    }
+                )
 
         print(f"Video Data: {video_data}")
         return video_data
 
     except re.exceptions.RequestException as e:
         raise e
+
 
 if __name__ == "__main__":
     playlist_id = get_playlist()
