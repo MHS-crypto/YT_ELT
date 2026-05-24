@@ -3,7 +3,8 @@ import json
 
 import os
 from dotenv import load_dotenv
-load_dotenv('./.env')
+
+load_dotenv("./.env")
 
 API_KEY = os.getenv("API_KEY")
 CHANNEL_HANDLE = os.getenv("CHANNEL_HANDLE")
@@ -25,27 +26,28 @@ def get_playlist():
         channel_playlistId = channel_items["contentDetails"]["relatedPlaylists"][
             "uploads"
         ]
-        
+
         print(f"Channel Playlist ID: {channel_playlistId}")
         return channel_playlistId
 
     except re.exceptions.RequestException as e:
         raise e
 
+
 def get_video_id(playlistId, max_results=10):
-    
+
     video_ids = []
     page_token = None
 
     url = f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults={max_results}&playlistId={playlistId}&key={API_KEY}"
-        
+
     try:
         while True:
             params = {
                 "part": "contentDetails",
                 "maxResults": max_results,
                 "playlistId": playlistId,
-                "key": API_KEY
+                "key": API_KEY,
             }
             if page_token:
                 params["pageToken"] = page_token
@@ -55,7 +57,7 @@ def get_video_id(playlistId, max_results=10):
 
             data = response.json()
             items = data.get("items", [])
-            
+
             for item in items:
                 video_id = item["contentDetails"]["videoId"]
                 video_ids.append(video_id)
@@ -74,4 +76,3 @@ def get_video_id(playlistId, max_results=10):
 if __name__ == "__main__":
     playlist_id = get_playlist()
     get_video_id(playlist_id)
-    
