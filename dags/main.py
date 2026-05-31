@@ -35,5 +35,5 @@ with DAG(
     video_data = get_video_data(video_ids)
     save_to_json_task = save_to_json(video_data)
 
-    # Desfine dependencies
+    # Define dependencies
     playlist_id >> video_ids >> video_data >> save_to_json_task
