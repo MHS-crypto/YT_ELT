@@ -3,6 +3,9 @@ import pendulum
 from datetime import datetime, timedelta
 from api.video_stats import get_playlist, get_video_id, get_video_data, save_to_json
 
+from datawarehouse.dwh import staging_table, core_table
+
+
 # default timezone
 local_tz = pendulum.timezone("Europe/Helsinki")
 
@@ -21,6 +24,11 @@ default_args = {
     # 'end_date': datetime(2030, 12, 31, tzinfo=local_tz),
 }
 
+# Variables
+staging_schema = "staging"
+core_schema = "core"
+
+# DAG 1 to extract YouTube video statistics and store them as JSON files
 with DAG(
     dag_id="process_youtube_video_stats_as_json",
     default_args=default_args,
@@ -37,3 +45,19 @@ with DAG(
 
     # Define dependencies
     playlist_id >> video_ids >> video_data >> save_to_json_task
+
+# DAG 2 to load data from JSON files into staging and core tables in the data warehouse
+with DAG(
+    dag_id="load_youtube_video_stats_to_dw",
+    default_args=default_args,
+    description="A DAG to load YouTube video statistics from JSON files into staging and core tables in the data warehouse",
+    schedule_interval='0 15 * * *',  # At 15:00 (3 PM) every day
+    catchup=False,
+) as dag_load:
+
+    # Define tasks
+    staging_task = staging_table()
+    core_task = core_table()
+
+    # Define dependencies
+    staging_task >> core_task
