@@ -2,15 +2,17 @@ import requests as re
 import json
 from datetime import datetime
 
-import os
-from dotenv import load_dotenv
+from airflow.decorators import task
+from airflow.models import Variable
 
-load_dotenv("./.env")
+# import os
+# from dotenv import load_dotenv
+# load_dotenv("./.env")
 
-API_KEY = os.getenv("API_KEY")
-CHANNEL_HANDLE = os.getenv("CHANNEL_HANDLE")
+API_KEY = Variable.get("API_KEY")
+CHANNEL_HANDLE = Variable.get("CHANNEL_HANDLE")
 
-
+@task
 def get_playlist():
     url = "https://youtube.googleapis.com/youtube/v3/channels"
 
@@ -38,7 +40,7 @@ def get_playlist():
     except re.exceptions.RequestException as e:
         raise e
 
-
+@task
 def get_video_id(playlistId, max_results=50):
 
     video_ids = []
@@ -81,7 +83,7 @@ def batch_video_ids(video_ids, batch_size=50):
     for i in range(0, len(video_ids), batch_size):
         yield video_ids[i : i + batch_size]
 
-
+@task
 def get_video_data(video_ids):
     url = "https://youtube.googleapis.com/youtube/v3/videos"
 
@@ -123,14 +125,8 @@ def get_video_data(video_ids):
     except re.exceptions.RequestException as e:
         raise e
 
-
+@task
 def save_to_json(extracted_data):
     file_path = f"./data/YT_video_stats_{datetime.today().strftime('%Y-%m-%d')}.json"
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(extracted_data, f, indent=4, ensure_ascii=False)
-
-if __name__ == "__main__":
-    playlist_id = get_playlist()
-    video_ids = get_video_id(playlist_id)
-    video_data = get_video_data(video_ids)
-    save_to_json(video_data)
