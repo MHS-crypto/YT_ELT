@@ -5,7 +5,7 @@ table = "yt_api"
 
 
 def get_postgres_connection():
-    pg_hook = PostgresHook(postgres_conn_id="postgres_db_yt_elt", database="yt_elt")
+    pg_hook = PostgresHook(postgres_conn_id="postgres_db_yt_elt", database="elt_db")
     conn = pg_hook.get_conn()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     return conn, cur
