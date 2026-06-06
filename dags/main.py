@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from api.video_stats import get_playlist, get_video_id, get_video_data, save_to_json
 
 from datawarehouse.dwh import staging_table, core_table
+from dataquality.soda import yt_elt_data_quality
 
 
 # default timezone
@@ -46,6 +47,7 @@ with DAG(
     # Define dependencies
     playlist_id >> video_ids >> video_data >> save_to_json_task
 
+
 # DAG 2 to load data from JSON files into staging and core tables in the data warehouse
 with DAG(
     dag_id="load_youtube_video_stats_to_dw",
@@ -61,3 +63,20 @@ with DAG(
 
     # Define dependencies
     staging_task >> core_task
+
+
+# DAG 3: data_quality
+with DAG(
+    dag_id="data_quality",
+    default_args=default_args,
+    description="DAG to check the data quality on both layers in the database",
+    catchup=False,
+    schedule=None,
+) as dag_quality:
+
+    # Define tasks
+    soda_validate_staging = yt_elt_data_quality(staging_schema)
+    soda_validate_core = yt_elt_data_quality(core_schema)
+
+    # Define dependencies
+    soda_validate_staging >> soda_validate_core
